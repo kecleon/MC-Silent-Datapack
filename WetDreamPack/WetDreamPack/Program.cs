@@ -14,6 +14,13 @@ namespace WetDreamPack
 		{
 			_datapack = File.ReadAllBytes("datapack.zip");
 			_watchPath = File.ReadAllText("savespath.txt").Replace("\r", "").Replace("\n", "");
+			foreach (var c in Path.GetInvalidPathChars())
+			{
+				if (_watchPath.Contains(c))
+				{
+					Console.WriteLine($"World saves path contains invalid character {c}\n{_watchPath}");
+				}
+			}
 
 			_watcher = new(_watchPath);
 			
