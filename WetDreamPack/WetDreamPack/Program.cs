@@ -6,17 +6,23 @@ namespace WetDreamPack
 	public class Program
 	{
 		private const string CheatDatapackName = "datapack.zip";
-		private const string WatchPath = @"C:\Users\YourName\Documents\MultiMC\instances\1.16.1 cheat\.minecraft\saves";
-		private static readonly FileSystemWatcher Watcher = new(WatchPath);
+		private static string _watchPath;
+		private static FileSystemWatcher _watcher;
+		private static byte[] _datapack;
 
 		public static void Main()
 		{
-			Watcher.NotifyFilter = NotifyFilters.DirectoryName;
-			Watcher.Created += WatcherOnCreated;
-			Watcher.IncludeSubdirectories = true;
-			Watcher.EnableRaisingEvents = true;
+			_datapack = File.ReadAllBytes("datapack.zip");
+			_watchPath = File.ReadAllText("savespath.txt").Replace("\r", "").Replace("\n", "");
 
-			Console.WriteLine("Watching");
+			_watcher = new(_watchPath);
+			
+			_watcher.NotifyFilter = NotifyFilters.DirectoryName;
+			_watcher.Created += WatcherOnCreated;
+			_watcher.IncludeSubdirectories = true;
+			_watcher.EnableRaisingEvents = true;
+
+			Console.WriteLine("Watching!");
 			Console.ReadLine();
 		}
 
@@ -27,9 +33,7 @@ namespace WetDreamPack
 				return;
 			}
 
-			Console.WriteLine($"new dir {e.FullPath}");
-
-			if (Directory.GetParent(e.FullPath)?.FullName != WatchPath)
+			if (Directory.GetParent(e.FullPath)?.FullName != _watchPath)
 			{
 				return;
 			}
@@ -43,10 +47,10 @@ namespace WetDreamPack
 			var cheatDatapackPath = Path.Combine(e.FullPath, "datapacks", CheatDatapackName);
 			if (!File.Exists(cheatDatapackPath))
 			{
-				File.Copy(CheatDatapackName, cheatDatapackPath);
+				File.WriteAllBytes(cheatDatapackPath, _datapack);
 			}
-			
-			Console.WriteLine("forsenCD DATAPACK.EXE ENABLED");
+
+			Console.WriteLine($"Added datapack to world {Path.GetDirectoryName(e.FullPath)}");
 		}
 	}
 }
